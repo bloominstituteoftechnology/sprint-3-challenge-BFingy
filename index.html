@@ -58,7 +58,59 @@
       // 🧠 Implement a `getAllReversed` method which returns the ints in reverse order
       // ❗ WARNING: except for `getAllReversed`, methods must respect the order of the integers
       // ❗ WARNING: note that none of the methods actually mutate the `ints` property
-
+      constructor(...integers) {
+        this.ints = integers;
+      }
+      getAll(ints) {
+        return this.ints;
+      }
+      getEvens(ints) {
+        let evens = [];
+        this.ints.forEach(int => {
+          if (int % 2 === 0) {
+            evens.push(int)
+          }
+        })        
+          return evens;
+      }
+      getNegatives(ints) {
+        let result = [];
+        this.ints.forEach(int => {
+          if (int < 0) {
+            result.push(int)
+          }
+        })
+        return result;
+      }
+      getAllSquared(ints) {
+        let result = [];
+        this.ints.forEach(int => {
+          result.push(int ** 2)
+        })
+        return result;
+      }
+      pop() {
+        let lastInteger = this.ints.pop()
+        return lastInteger
+      }
+      push(newInt) {
+        this.ints.push(newInt)
+        return this.ints;
+      }
+      getEveryNth(n) {
+        let result = [];
+        for (let i = 0; i < this.ints.length; i += n) {
+          result.push(this.ints[i])
+        }
+        return result;
+      }
+      getAllReversed(ints) {
+        let reversed = [];
+        this.ints.forEach(val => {
+          reversed.unshift(val);
+        })
+        return reversed;
+      }
     }
 
     // 👉 CHALLENGE 2 NerfGun
@@ -76,7 +128,35 @@
       //      * When engaging the safety, return "Safety enabled!"
       //      * When disengaging the safety, return "Safety disabled!"
       // 🌟 HINT: instances need to keep track of their maximum capacity as well as their current capacity
-
+      constructor(totalProjectiles) {
+        this.projectiles = totalProjectiles;
+        this.maxCapacity = totalProjectiles;
+        this.currentCapacity = this.projectiles;
+        this.safety = true;
+      }
+      shoot() {
+        if (this.currentCapacity > 0 && !this.safety) {
+          this.currentCapacity--;
+          return 'Bang!';
+        } else {
+          return 'Click!';
+        }
+      }
+      reload(amount) {
+        if (typeof amount !== 'number' || isNaN(amount) || amount <= 0) {
+          return 'Error reloading!';
+        } else {
+          this.currentCapacity += amount;
+          if (this.currentCapacity > this.maxCapacity) {
+            this.currentCapacity = this.maxCapacity;            
+          }
+          return `${this.currentCapacity} projectiles left!`;
+        }
+      }
+      toggleSafety(){
+        this.safety = !this.safety;
+        return this.safety ? 'Safety enabled!' : 'Safety disabled!';
+      }
     }
 
     // 👉 CHALLENGE 3 EBook
@@ -95,7 +175,28 @@
       //    ebook.next() // returns null
       // 🌟 HINT: remember about the `slice` method which strings and arrays have
       // ❗ Feel free to implement `back`, although this is not required nor graded
-
+      constructor(book, charactersPer) {
+        this.book = book;
+        this.charactersPer = charactersPer;
+        this.currentPage = 0;
+      }
+      next() {
+        if (this.book === null) {
+          return null;
+        } else {
+          const startIndex = this.currentPage * this.charactersPer;
+          if (startIndex>= this.book.length) {
+            return null;
+          }
+          let endIndex = startIndex + this.charactersPer;
+          if (endIndex > this.book.length) {
+            endIndex = this.book.length;
+          }
+          let currentContent = this.book.slice(startIndex, endIndex);
+          this.currentPage++;
+          return currentContent;
+        }
+      }
     }
 
     // 👉 CHALLENGE 4 AntFarm
@@ -131,6 +232,44 @@
       // 👉 HINT: if you are not feeling confident with map and filter, solve the problem with for loops,
       //      and with the piece of mind of all tests passing, refactor to use map/filter
 
+      //*I think my references are intertwined? Mutable and immutable
+      constructor(...antNames) {
+        this.ants = antNames.map(name => ({name, health: 100}))
+        //*might need to make a copy to manipulate? but where and how?
+      }
+      work(){
+
+        //for each ant that works take 20 hp
+        this.ants.forEach(ant => {
+          ant.health -= 20;
+        });
+
+        //filter the ants that survive
+        this.ants = this.ants.filter(ant => ant.health > 0);
+
+        //if no ants survived:
+        if (this.ants.length === 0) {
+          return 'No ants here. Did you work them to death?'
+          //this many ants survived
+        } else {
+        return `${this.ants.length} ants starting work!`;
+        }
+      }
+      
+      feed(name) {
+        //filter the ants that have matching names
+        let realAnts = this.ants.filter(ant => ant.name === name);
+        console.log(this.ants, realAnts)
+        //the names do not match
+        if (realAnts.length === 0) {
+          return `${name} not found!`
+          //the names match
+        } else {
+          //*I might be going about adding the +15 health wrong here...
+          this.ants = this.ants.map(ant => ant.name === name ? {...ant, health: ant.health + 15} : ant);
+          return 'Yum!';
+        }
+      }      
     }
 
     // 🧪 TESTS, do not make any changes below this line ===================
@@ -366,7 +505,7 @@
             const farm = new AntFarm('Jess', 'Blake', 'Jess')
             farm.ants[0].health++
             actual = []
-            farm.work(); farm.work(); farm.work(); farm.work()
+            farm.work(); farm.work(); farm.work();
             actual.push(farm.work()); actual.push(farm.work()); actual.push(farm.work())
           } catch (err) { actual = err.message }
           return [description, expected, actual]
